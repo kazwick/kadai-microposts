@@ -36,6 +36,4 @@ abstract class Controller extends BaseController
             'password' => bcrypt($data['password']),
         ]);
     }
-        // 追加
-    protected $redirectTo = '/';
 }
