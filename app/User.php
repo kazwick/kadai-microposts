@@ -87,4 +87,60 @@ class User extends Model implements AuthenticatableContract,
     public function is_following($userId) {
         return $this->followings()->where('follow_id', $userId)->exists();
     }
+
+    public function feed_microposts()
+    {
+        $follow_user_ids = $this->followings()->lists('users.id')->toArray();
+        $follow_user_ids[] = $this->id;
+        return Micropost::whereIn('user_id', $follow_user_ids);
+    }
+
+    public function likings()
+    {
+        return $this->belongsToMany(User::class, 'user_like', 'user_id', 'like_id')->withTimestamps();
+    }
+    
+    public function likers()
+    {
+        return $this->belongsToMany(User::class, 'user_like', 'like_id', 'user_id')->withTimestamps();
+    }
+    public function like($userId)
+    {
+        // 既にLikeしているかの確認
+        $exist = $this->is_liking($userId);
+        // 自分自身ではないかの確認
+        $its_me = $this->id == $userId;
+        
+        if ($exist || $its_me) {
+            // 既にLikeしていれば何もしない
+            return false;
+        } else {
+            // 未LikeであればLikeする
+            $this->likings()->attach($userId);
+            return true;
+        }
+    }
+    
+    public function unlike($userId)
+    {
+        // 既にLikeしているかの確認
+        $exist = $this->is_liking($userId);
+        // 自分自身ではないかの確認
+        $its_me = $this->id == $userId;
+        
+        if ($exist && !$its_me) {
+            // 既にLikeしていればLikeを外す
+            $this->likings()->detach($userId);
+            return true;
+        } else {
+            // 未Likeであれば何もしない
+            return false;
+        }
+    }
+
+    public function is_liking($userId) {
+        return $this->likings()->where('like_id', $userId)->exists();
+    }
+    
 }
+
