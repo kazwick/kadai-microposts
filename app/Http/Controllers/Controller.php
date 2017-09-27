@@ -11,6 +11,7 @@ abstract class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
+/* ここから不要です。 須田 2017.09.26 
         // 追加
     protected $redirectTo = '/';
 
@@ -36,4 +37,17 @@ abstract class Controller extends BaseController
             'password' => bcrypt($data['password']),
         ]);
     }
+    ここまで須田     */
+    
+    public function counts($user) {
+        $count_microposts = $user->microposts()->count();
+        $count_followings = $user->followings()->count();
+        $count_followers = $user->followers()->count();
+        
+        return [
+            'count_microposts' => $count_microposts,
+            'count_followings' => $count_followings,
+            'count_followers' => $count_followers,
+        ];
+    }    
 }
